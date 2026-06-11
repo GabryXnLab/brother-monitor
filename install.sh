@@ -55,9 +55,15 @@ EOF
 
 sudo systemctl daemon-reload
 
+# Regola udev: avvia il servizio utente appena si collega la stampante Brother USB
+UDEV_RULE="/etc/udev/rules.d/72-printer-monitor.rules"
+sudo cp -- printer-monitor.rules "$UDEV_RULE"
+sudo udevadm control --reload-rules
+
 echo "==> Installazione completata."
 echo "    Avvia con:                printer-monitor"
-echo "    Si avvierà automaticamente al login (XDG autostart per tutti gli utenti)."
+echo "    Si avvierà automaticamente al login (XDG autostart per tutti gli utenti)"
+echo "    e appena colleghi una stampante Brother via USB (regola udev)."
 echo ""
 echo "    Per gestirlo via systemd (per utente):"
 echo "      systemctl --user enable --now printer-monitor"

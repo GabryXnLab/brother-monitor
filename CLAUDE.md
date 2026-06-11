@@ -26,7 +26,24 @@ bash install.sh
 
 ## Architecture
 
-The app is a **PyQt6 system tray monitor** for network printers. It polls printers via HTTP (Brother web interface) or SNMP and shows status in a tray icon and optional window.
+The app is a **PyQt6 system tray monitor** for Brother printers. It polls a printer via HTTP (Brother web interface) or SNMP and shows status in a tray icon and optional window.
+
+### ⚠️ Connettività: USB *e* rete (non solo rete!)
+
+> **NON assumere che serva una stampante di rete.** Il caso d'uso principale è una stampante **collegata via USB**.
+>
+> Il driver di default `brother_http` interroga `http://localhost:60000`. Quella porta **non** è la stampante in rete: è il bridge **`ipp-usb`** (systemd service `ipp-usb.service`, demone `/sbin/ipp-usb`) che espone via HTTP su `localhost` l'interfaccia web di una stampante collegata in **USB** (IPP-over-USB, interfaccia `070104`). `ipp-usb` viene avviato automaticamente da una regola udev (`/usr/lib/udev/rules.d/71-ipp-usb.rules`) quando colleghi la stampante, e assegna la prima porta libera a partire da `60000`.
+>
+> Quindi: **USB → `ipp-usb` (localhost:60000) → driver `brother_http` → dati**. La modalità SNMP/rete (`driver: snmp`, campo `host`) è un'alternativa, non l'unico modo.
+>
+> Diagnosi rapida se "non si attiva":
+> 1. La stampante è vista da USB? `lsusb | grep -i brother`
+> 2. `ipp-usb` è attivo e la porta risponde? `systemctl status ipp-usb` + `curl -s -o /dev/null -w '%{http_code}' http://localhost:60000/general/status.html` (atteso `200`)
+> 3. **L'app è in esecuzione?** `pgrep -af brother_monitor`. È una tray-app che parte al login/su evento udev, **non** è event-driven da sola: se il processo è giù, collegare la stampante non lo risveglia da solo (vedi regola udev sotto).
+
+### Deploy / avvio automatico
+
+`install.sh` installa l'app in `/usr/local/lib/printer-monitor`, registra un **XDG autostart** (`/etc/xdg/autostart/printer-monitor.desktop`, parte al login), un **systemd user service** (`printer-monitor.service`, con `Restart=on-failure`) e una **regola udev** (`/etc/udev/rules.d/72-printer-monitor.rules`) che avvia il servizio utente via `SYSTEMD_USER_WANTS` appena viene collegata una stampante Brother USB. Il file sorgente della regola nel repo è `printer-monitor.rules`.
 
 **Data flow:**
 1. Each `PrinterDriver.fetch()` returns a `PrinterData` dataclass.
@@ -34,7 +51,7 @@ The app is a **PyQt6 system tray monitor** for network printers. It polls printe
 
 **Key modules:**
 - `drivers/base.py` — `PrinterDriver` ABC and `PrinterData` dataclass. No Qt dependency.
-- `drivers/brother_http.py` — scrapes the Brother printer's built-in web UI via HTTP.
+- `drivers/brother_http.py` — scrapes the Brother printer's built-in web UI via HTTP. Default URL `http://localhost:60000` targets the `ipp-usb` bridge for a **USB-connected** printer (see Connettività above), not a network host.
 - `drivers/snmp.py` — polls printers via SNMP OIDs.
 - `config.py` — YAML config at `~/.config/printer-monitor/config.yaml`. `load_config` / `save_config`.
 - `history.py` — `HistoryDB`: SQLite storage for per-printer readings.
