@@ -1,0 +1,9 @@
+# Avvia Printer Monitor (servizio utente) appena viene collegata una
+# stampante Brother via USB con interfaccia IPP-over-USB (070104).
+#
+# Stesso meccanismo della regola di ipp-usb (71-ipp-usb.rules): il device
+# viene taggato per systemd e, tramite SYSTEMD_USER_WANTS, il gestore di
+# servizi --user di ogni utente loggato avvia printer-monitor.service.
+#
+# Installato da install.sh in /etc/udev/rules.d/72-printer-monitor.rules
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{ID_VENDOR_ID}=="04f9", ENV{ID_USB_INTERFACES}=="*:070104:*", TAG+="systemd", ENV{SYSTEMD_USER_WANTS}+="printer-monitor.service"
