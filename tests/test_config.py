@@ -13,7 +13,7 @@ def test_default_printer_is_brother_http(tmp_path):
     assert p.driver == "brother_http"
     assert p.url == "http://localhost:60000"
     assert p.name == "Brother DCP-L2550DN"
-    assert p.cups_printer == "Brother_DCP_L2550DN"
+    assert p.cups_printer == "Brother_DCP-L2550DN"
 
 
 def test_default_notif_thresholds(tmp_path):

@@ -7,7 +7,7 @@ import signal
 import tempfile
 from datetime import datetime
 
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QSystemTrayIcon
 from PyQt6.QtCore import QTimer
 
 from config import load_config, save_config
@@ -90,6 +90,16 @@ def main() -> None:
 
     window = MainWindow(cfg)
     tray   = BrotherTray(window)
+    if not QSystemTrayIcon.isSystemTrayAvailable():
+        print(
+            "ATTENZIONE: nessun system tray disponibile (nessuno "
+            "StatusNotifierWatcher sul bus DBus). Su GNOME serve l'estensione "
+            "'AppIndicator and KStatusNotifierItem Support' "
+            "(dnf install gnome-shell-extension-appindicator, poi abilitala "
+            "con 'gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com' "
+            "e rifai il login). L'app continua ad avviarsi ma l'icona non sarà visibile.",
+            file=sys.stderr,
+        )
     tray.show()
 
     def do_refresh(idx: int) -> None:

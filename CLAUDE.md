@@ -36,6 +36,15 @@ The app is a **PyQt6 system tray monitor** for Brother printers. It polls a prin
 >
 > Quindi: **USB → `ipp-usb` (localhost:60000) → driver `brother_http` → dati**. La modalità SNMP/rete (`driver: snmp`, campo `host`) è un'alternativa, non l'unico modo.
 >
+> **Questo progetto NON abilita la stampa** — fa solo monitoraggio (toner/drum/stato). La stampa vera e propria è compito di CUPS. Su OS moderni (CUPS 2.3+, verificato su Fedora 44) `ipp-usb` espone la stampante anche come endpoint **IPP Everywhere/AirPrint driverless** (`ipp://localhost:60000/ipp/print`, verificabile con `ipptool -tv http://localhost:60000/ipp/print get-printer-attributes.test` o `avahi-browse -art | grep -i brother`): se compare solo "Salva come PDF" nei dialoghi di stampa del browser, quasi sempre la stampante non è ancora registrata come coda CUPS (non basta che `ipp-usb` sia attivo). Si registra con:
+> ```bash
+> sudo lpadmin -p Brother -E -v "ipp://localhost:60000/ipp/print" -m everywhere
+> lpoptions -d Brother   # opzionale: default utente
+> ```
+> Nessun driver Brother proprietario necessario — `-m everywhere` usa il driver IPP Everywhere integrato in CUPS. Il campo `cups_printer` in `config.py`/`config.yaml` (usato dal pulsante "Stampa pagina di test" in Impostazioni, `main_window.py:_print_test_page`) deve corrispondere esattamente al nome coda scelto qui (`lpstat -p` per verificare).
+>
+> **Qualità/DPI non selezionabile dal pannello di stampa "rapido" del browser (Chrome/Vivaldi/Chromium)**: non è un problema di CUPS o di questo progetto — quel pannello ha un set di campi fisso e hardcoded (formato carta, scala, fronte/retro), la qualità driver-specific non c'è mai stata su nessuna distro. Va usato "Stampa con dialogo di sistema" (`Ctrl+Shift+P`), dove `cupsPrintQuality` (Draft/Normal/High) è disponibile. **Non creare code CUPS duplicate per aggirarlo** (tentato e scartato l'2026-08-13: confonde l'elenco stampanti senza risolvere il vero limite). Se serve saltare il pannello rapido di default, esiste la policy Chromium `PrintPreviewDisabled` (non applicata di default, vedi README).
+>
 > Diagnosi rapida se "non si attiva":
 > 1. La stampante è vista da USB? `lsusb | grep -i brother`
 > 2. `ipp-usb` è attivo e la porta risponde? `systemctl status ipp-usb` + `curl -s -o /dev/null -w '%{http_code}' http://localhost:60000/general/status.html` (atteso `200`)
@@ -43,7 +52,12 @@ The app is a **PyQt6 system tray monitor** for Brother printers. It polls a prin
 
 ### Deploy / avvio automatico
 
-`install.sh` installa l'app in `/usr/local/lib/printer-monitor`, registra un **XDG autostart** (`/etc/xdg/autostart/printer-monitor.desktop`, parte al login), un **systemd user service** (`printer-monitor.service`, con `Restart=on-failure`) e una **regola udev** (`/etc/udev/rules.d/72-printer-monitor.rules`) che avvia il servizio utente via `SYSTEMD_USER_WANTS` appena viene collegata una stampante Brother USB. Il file sorgente della regola nel repo è `printer-monitor.rules`.
+`install.sh` installa l'app in `/usr/local/lib/printer-monitor`, creando lì un **venv dedicato via `uv sync --frozen --no-dev`** (nessuna dipendenza da pacchetti Python di sistema — richiede `uv` installato), registra un **XDG autostart** (`/etc/xdg/autostart/printer-monitor.desktop`, parte al login), un **systemd user service** (`printer-monitor.service`, con `Restart=on-failure`) e una **regola udev** (`/etc/udev/rules.d/72-printer-monitor.rules`) che avvia il servizio utente via `SYSTEMD_USER_WANTS` appena viene collegata una stampante Brother USB. Il file sorgente della regola nel repo è `printer-monitor.rules`.
+
+### Troubleshooting
+
+- **Servizio in crash-loop dopo reinstallazione OS** (`journalctl --user -u printer-monitor` mostra `ModuleNotFoundError`): il venv in `/usr/local/lib/printer-monitor/.venv` manca o è di un OS precedente. Rilancia `bash install.sh` (richiede `uv` installato: `curl -LsSf https://astral.sh/uv/install.sh | sh`).
+- **Nessuna icona in tray su GNOME** anche col servizio `active (running)`: GNOME non espone `StatusNotifierItem` nativamente. Serve l'estensione `gnome-shell-extension-appindicator`, abilitata con `gnome-extensions enable appindicatorsupport@rgcjonas.gmail.com`, poi logout/login. L'app stessa logga un avviso su stderr/journal quando `QSystemTrayIcon.isSystemTrayAvailable()` è `False`.
 
 **Data flow:**
 1. Each `PrinterDriver.fetch()` returns a `PrinterData` dataclass.

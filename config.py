@@ -20,7 +20,7 @@ class PrinterConfig:
     name: str = "Brother DCP-L2550DN"
     driver: str = "brother_http"          # "brother_http" | "snmp"
     url: str = "http://localhost:60000"    # used by brother_http driver
-    cups_printer: str = "Brother_DCP_L2550DN"  # used for test-print via lp
+    cups_printer: str = "Brother_DCP-L2550DN"  # used for test-print via lp; must match the CUPS queue name (lpstat -p)
     host: str = ""                         # used by snmp driver
     community: str = "public"             # used by snmp driver
     polling_interval_sec: int = 60
