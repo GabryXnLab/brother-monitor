@@ -1,0 +1,26 @@
+# Prepara l'ambiente del Copilot cloud agent prima che inizi a lavorare, così può
+# compilare e lanciare i test. Copilot lo cerca solo sul branch di default e solo se il
+# job si chiama esattamente `copilot-setup-steps`.
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths: [.github/workflows/copilot-setup-steps.yml]
+  pull_request:
+    paths: [.github/workflows/copilot-setup-steps.yml]
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen
