@@ -37,7 +37,7 @@ dev = [
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.14.0" },
     { name = "pyqt6", specifier = ">=6.9.0" },
-    { name = "pysnmp", specifier = ">=5.0" },
+    { name = "pysnmp", specifier = ">=7.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "requests", specifier = ">=2.32.0" },
 ]
