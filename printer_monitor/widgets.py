@@ -1,4 +1,4 @@
-# widgets.py
+# printer_monitor/widgets.py
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import Qt, QRectF
 from PyQt6.QtGui import QPainter, QPen, QColor, QFont

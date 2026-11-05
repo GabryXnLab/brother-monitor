@@ -1,5 +1,5 @@
 import pytest
-from drivers.base import PrinterData, PrinterDriver
+from printer_monitor.drivers.base import PrinterData, PrinterDriver
 
 
 def test_printer_data_defaults():

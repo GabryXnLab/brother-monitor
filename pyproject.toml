@@ -1,15 +1,46 @@
 [project]
 name = "brother-monitor"
-version = "0.1.0"
-description = "Monitor per stampanti Brother via SNMP"
+version = "0.2.0"
+description = "System tray monitor for Brother printers over USB (ipp-usb) and any printer via SNMP"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "GabryXn" }]
 requires-python = ">=3.11"
+keywords = ["printer", "brother", "toner", "snmp", "ipp-usb", "system-tray", "pyqt6"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Printing",
+    "Topic :: System :: Monitoring",
+]
 dependencies = [
     "PyQt6>=6.9.0",
     "requests>=2.32.0",
     "beautifulsoup4>=4.14.0",
     "pyyaml>=6.0",
-    "pysnmp>=5.0",
+    "pysnmp>=7.0",
 ]
+
+[project.scripts]
+printer-monitor = "printer_monitor.app:main"
+
+[project.urls]
+Homepage = "https://github.com/GabryXnLab/brother-monitor"
+Issues = "https://github.com/GabryXnLab/brother-monitor/issues"
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["printer_monitor"]
+
+[tool.hatch.build.targets.sdist]
+include = ["printer_monitor", "tests", "README.md", "LICENSE", "printer-monitor.rules"]
 
 [dependency-groups]
 dev = [

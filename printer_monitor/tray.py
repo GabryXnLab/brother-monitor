@@ -1,4 +1,4 @@
-# tray.py
+# printer_monitor/tray.py
 from __future__ import annotations
 import time
 import os
@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QSystemTrayIcon, QMenu, QApplication
 from PyQt6.QtGui import QIcon, QPixmap, QColor, QPainter
 from PyQt6.QtCore import Qt
 
-from drivers.base import PrinterData
+from printer_monitor.drivers.base import PrinterData
 
 # UNUSED: verifica se eliminabile invece di cancellarla
 LEVEL_INFO = QSystemTrayIcon.MessageIcon.Information

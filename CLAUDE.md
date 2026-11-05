@@ -18,7 +18,10 @@ uv run pytest tests/test_brother_http_driver.py
 uv run pytest tests/test_brother_http_driver.py::test_parse_info_toner_drum
 
 # Run the application
-uv run python brother_monitor.py
+uv run printer-monitor          # oppure: uv run python brother_monitor.py (shim)
+
+# Build sdist + wheel (dist/)
+uv build
 
 # Install system-wide
 bash install.sh
@@ -41,14 +44,14 @@ The app is a **PyQt6 system tray monitor** for Brother printers. It polls a prin
 > sudo lpadmin -p Brother -E -v "ipp://localhost:60000/ipp/print" -m everywhere
 > lpoptions -d Brother   # opzionale: default utente
 > ```
-> Nessun driver Brother proprietario necessario — `-m everywhere` usa il driver IPP Everywhere integrato in CUPS. Il campo `cups_printer` in `config.py`/`config.yaml` (usato dal pulsante "Stampa pagina di test" in Impostazioni, `main_window.py:_print_test_page`) deve corrispondere esattamente al nome coda scelto qui (`lpstat -p` per verificare).
+> Nessun driver Brother proprietario necessario — `-m everywhere` usa il driver IPP Everywhere integrato in CUPS. Il campo `cups_printer` in `printer_monitor/config.py`/`config.yaml` (usato dal pulsante "Stampa pagina di test" in Impostazioni, `printer_monitor/main_window.py:_print_test_page`) deve corrispondere esattamente al nome coda scelto qui (`lpstat -p` per verificare).
 >
 > **Qualità/DPI non selezionabile dal pannello di stampa "rapido" del browser (Chrome/Vivaldi/Chromium)**: non è un problema di CUPS o di questo progetto — quel pannello ha un set di campi fisso e hardcoded (formato carta, scala, fronte/retro), la qualità driver-specific non c'è mai stata su nessuna distro. Va usato "Stampa con dialogo di sistema" (`Ctrl+Shift+P`), dove `cupsPrintQuality` (Draft/Normal/High) è disponibile. **Non creare code CUPS duplicate per aggirarlo** (tentato e scartato l'2026-08-13: confonde l'elenco stampanti senza risolvere il vero limite). Se serve saltare il pannello rapido di default, esiste la policy Chromium `PrintPreviewDisabled` (non applicata di default, vedi README).
 >
 > Diagnosi rapida se "non si attiva":
 > 1. La stampante è vista da USB? `lsusb | grep -i brother`
 > 2. `ipp-usb` è attivo e la porta risponde? `systemctl status ipp-usb` + `curl -s -o /dev/null -w '%{http_code}' http://localhost:60000/general/status.html` (atteso `200`)
-> 3. **L'app è in esecuzione?** `pgrep -af brother_monitor`. È una tray-app che parte al login/su evento udev, **non** è event-driven da sola: se il processo è giù, collegare la stampante non lo risveglia da solo (vedi regola udev sotto).
+> 3. **L'app è in esecuzione?** `pgrep -af 'printer.monitor|brother_monitor'`. È una tray-app che parte al login/su evento udev, **non** è event-driven da sola: se il processo è giù, collegare la stampante non lo risveglia da solo (vedi regola udev sotto).
 
 ### Deploy / avvio automatico
 
@@ -61,9 +64,9 @@ The app is a **PyQt6 system tray monitor** for Brother printers. It polls a prin
 
 **Data flow:**
 1. Each `PrinterDriver.fetch()` returns a `PrinterData` dataclass.
-2. `brother_monitor.py` owns one `QTimer` per printer and wires: driver → `MainWindow.update_data()` + `BrotherTray.update_all_statuses()` + `_check_notifications()`
+2. `printer_monitor/app.py` owns one `QTimer` per printer and wires: driver → `MainWindow.update_data()` + `BrotherTray.update_all_statuses()` + `_check_notifications()`
 
-**Key modules:**
+**Key modules** (all inside the `printer_monitor/` package; the root `brother_monitor.py` is only a shim kept for old autostart entries and `uv run python brother_monitor.py`):
 - `drivers/base.py` — `PrinterDriver` ABC and `PrinterData` dataclass. No Qt dependency.
 - `drivers/brother_http.py` — scrapes the Brother printer's built-in web UI via HTTP. Default URL `http://localhost:60000` targets the `ipp-usb` bridge for a **USB-connected** printer (see Connettività above), not a network host.
 - `drivers/snmp.py` — polls printers via SNMP OIDs.
@@ -72,7 +75,7 @@ The app is a **PyQt6 system tray monitor** for Brother printers. It polls a prin
 - `tray.py` — `BrotherTray(QSystemTrayIcon)`: SVG tray icon, tray menu, debounced desktop notifications (1 per key per 60 min).
 - `main_window.py` — `MainWindow(QMainWindow)`: 4-tab window (Stato/Statistiche/Storico/Impostazioni). Emits `refresh_requested`, `refresh_interval_changed`, `config_saved`, `printer_selected`, `clear_history_requested`.
 - `widgets.py` — `CircularGauge(QWidget)`: custom-painted arc gauge for toner/drum percentages.
-- `brother_monitor.py` — entry point; creates `QApplication` and connects signals.
+- `app.py` — entry point (`main`, console script `printer-monitor`, also `python -m printer_monitor`); creates `QApplication` and connects signals.
 
 **Tests** use `pytest-qt` with `QT_QPA_PLATFORM=offscreen` (set in `conftest.py`). Drivers are tested by mocking HTTP responses. `tmp_path` fixture used for config and DB tests.
 

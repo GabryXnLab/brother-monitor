@@ -2,8 +2,8 @@
 import pytest
 import requests
 from unittest.mock import patch, MagicMock
-from drivers.brother_http import BrotherHTTPDriver, _parse_info, _parse_status
-from drivers.base import PrinterData
+from printer_monitor.drivers.brother_http import BrotherHTTPDriver, _parse_info, _parse_status
+from printer_monitor.drivers.base import PrinterData
 from tests.conftest import INFO_HTML_FIXTURE, STATUS_HTML_OK, STATUS_HTML_IDLE, STATUS_HTML_ERROR
 
 
@@ -74,7 +74,7 @@ def _mock_response(text: str) -> MagicMock:
 
 
 def test_fetch_returns_data_when_online():
-    with patch("drivers.brother_http.requests.get") as mock_get:
+    with patch("printer_monitor.drivers.brother_http.requests.get") as mock_get:
         mock_get.side_effect = [
             _mock_response(INFO_HTML_FIXTURE),
             _mock_response(STATUS_HTML_IDLE),
@@ -87,7 +87,7 @@ def test_fetch_returns_data_when_online():
 
 
 def test_fetch_returns_offline_on_connection_error():
-    with patch("drivers.brother_http.requests.get",
+    with patch("printer_monitor.drivers.brother_http.requests.get",
                side_effect=requests.exceptions.ConnectionError):
         driver = BrotherHTTPDriver(base_url="http://fake:9999")
         data = driver.fetch()

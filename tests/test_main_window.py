@@ -1,9 +1,9 @@
 # tests/test_main_window.py
 import pytest
 from PyQt6.QtWidgets import QTabWidget
-from config import AppConfig, PrinterConfig
-from main_window import MainWindow
-from drivers.base import PrinterData
+from printer_monitor.config import AppConfig, PrinterConfig
+from printer_monitor.main_window import MainWindow
+from printer_monitor.drivers.base import PrinterData
 
 
 @pytest.fixture

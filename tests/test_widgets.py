@@ -1,6 +1,6 @@
 # tests/test_widgets.py
 from PyQt6.QtGui import QColor
-from widgets import CircularGauge
+from printer_monitor.widgets import CircularGauge
 
 
 def test_gauge_default_value(qtbot):

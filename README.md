@@ -1,11 +1,34 @@
 # Printer Monitor
 
-A **PyQt6 system tray application** for monitoring Brother printers (and other network printers via SNMP). Shows toner/drum levels, print counters, and current status with desktop notifications.
+A **Linux system tray monitor for printers**: toner and drum levels, page counters, paper jams, error log and desktop notifications when consumables run low.
 
-This project started to work around older OSes lacking usable Brother drivers. On current distros, actual printing is handled natively by CUPS via IPP Everywhere / `ipp-usb` (see [Printing](#printing-not-what-this-app-does--read-this-first) below) — this app's job is monitoring, not enabling printing itself.
+- **Brother printers connected via USB** — read through [`ipp-usb`](https://github.com/OpenPrinting/ipp-usb), which exposes the printer's built-in web UI on `localhost`. Most printer monitors assume a network printer; this one works with the cable.
+- **Any network printer via SNMP** — standard Printer MIB (RFC 3805), not Brother-specific.
 
+It only monitors: printing itself is CUPS's job (see [Printing](#printing-not-what-this-app-does--read-this-first)).
+
+[![CI](https://github.com/GabryXnLab/brother-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/GabryXnLab/brother-monitor/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+| Status | Statistics |
+|---|---|
+| ![Status tab](docs/screenshots/status.png) | ![Statistics tab](docs/screenshots/stats.png) |
+
+The interface is currently in Italian.
+
+## Supported printers
+
+| Driver | Printers | Status |
+|---|---|---|
+| `brother_http` (USB via `ipp-usb`, or a network Brother) | Brother DCP-L2550DN | tested |
+| `brother_http` | other Brother laser models with the same web UI (`/general/information.html`) | likely, untested |
+| `snmp` | any printer exposing the standard Printer MIB | toner, drum, status |
+
+The Brother driver parses the printer's web page, so a model with a different
+layout may show missing values. If yours does, please open a
+[new printer model issue](https://github.com/GabryXnLab/brother-monitor/issues/new?template=new_printer_model.yml)
+with the page HTML attached: it becomes a test fixture and the model gets supported.
 
 ## Features
 
@@ -21,22 +44,33 @@ This project started to work around older OSes lacking usable Brother drivers. O
 
 - Linux with a graphical session (X11 or Wayland via XWayland)
 - Python 3.11+
-- [`uv`](https://docs.astral.sh/uv/) — required both for development and for `install.sh`, which uses it to create the app's own venv
+- [`uv`](https://docs.astral.sh/uv/) (or `pipx`) — `install.sh` and development use `uv`
 - On GNOME: the [AppIndicator and KStatusNotifierItem Support](https://extensions.gnome.org/extension/615/appindicator-support/) shell extension, since GNOME does not expose a system tray natively
 
 ## Installation
 
-### Quick install (system-wide)
+### As a user tool (recommended)
 
 ```bash
-git clone https://github.com/GabryXn/brother-monitor.git
+uv tool install git+https://github.com/GabryXnLab/brother-monitor   # or: pipx install git+https://github.com/GabryXnLab/brother-monitor
+printer-monitor
+```
+
+To start it at login, tick *Impostazioni → Avvia automaticamente al login* in the app.
+
+### System-wide, with auto-start on USB plug-in
+
+```bash
+git clone https://github.com/GabryXnLab/brother-monitor.git
 cd brother-monitor
 bash install.sh
 ```
 
-This installs to `/usr/local/lib/printer-monitor`, creates a dedicated venv there via `uv sync` (so no system Python packages are needed), and adds a `printer-monitor` binary to your `$PATH`. It also sets up an XDG autostart entry and a systemd user service.
+This installs to `/usr/local/lib/printer-monitor`, creates a dedicated venv there via `uv sync` (so no system Python packages are needed), and adds a `printer-monitor` binary to your `$PATH`. It also sets up an XDG autostart entry, a systemd user service and a udev rule that starts the monitor when a Brother USB printer is plugged in.
 
-On GNOME, also install the tray extension so the icon is visible:
+### GNOME
+
+GNOME has no system tray by default; install the extension so the icon is visible:
 
 ```bash
 sudo dnf install -y gnome-shell-extension-appindicator   # Fedora; use your distro's package manager otherwise
@@ -48,10 +82,10 @@ then log out and back in.
 ### Development setup
 
 ```bash
-git clone https://github.com/GabryXn/brother-monitor.git
+git clone https://github.com/GabryXnLab/brother-monitor.git
 cd brother-monitor
 uv sync --dev
-uv run python brother_monitor.py
+uv run printer-monitor
 ```
 
 ## Printing (not what this app does — read this first)
@@ -142,16 +176,18 @@ Tests run headless (no display required) via `QT_QPA_PLATFORM=offscreen`.
 ## Project structure
 
 ```
-brother_monitor.py   — entry point, wires Qt components together
-config.py            — YAML config loader/saver
-history.py           — SQLite history storage
-tray.py              — system tray icon and notifications
-main_window.py       — main 3-tab window (Status / Stats / Settings)
-widgets.py           — CircularGauge custom widget
-drivers/
-  base.py            — PrinterDriver ABC and PrinterData dataclass
-  brother_http.py    — Brother web interface scraper
-  snmp.py            — SNMP polling driver
+printer_monitor/
+  app.py             — entry point (`printer-monitor`), wires Qt components together
+  config.py          — YAML config loader/saver
+  history.py         — SQLite history storage
+  tray.py            — system tray icon and notifications
+  main_window.py     — main 4-tab window (Status / Stats / History / Settings)
+  widgets.py         — CircularGauge custom widget
+  drivers/
+    base.py          — PrinterDriver ABC and PrinterData dataclass
+    brother_http.py  — Brother web interface scraper
+    snmp.py          — SNMP polling driver
+brother_monitor.py   — compatibility shim for `python brother_monitor.py`
 tests/               — pytest test suite
 ```
 

@@ -28,3 +28,5 @@ docs/superpowers/
 # KDE folder icon (managed by GitSync-KDE)
 .directory
 # <<< GitSync-KDE <<<
+
+dist/

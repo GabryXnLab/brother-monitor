@@ -1,4 +1,4 @@
-# main_window.py
+# printer_monitor/main_window.py
 from __future__ import annotations
 import subprocess
 import sys
@@ -13,9 +13,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 
-from config import AppConfig
-from drivers.base import PrinterData
-from widgets import CircularGauge
+from printer_monitor.config import AppConfig
+from printer_monitor.drivers.base import PrinterData
+from printer_monitor.widgets import CircularGauge
 
 AUTOSTART_PATH = Path.home() / ".config/autostart/printer-monitor.desktop"
 
@@ -318,8 +318,7 @@ class MainWindow(QMainWindow):
     def _toggle_autostart(self, enabled: bool) -> None:
         AUTOSTART_PATH.parent.mkdir(parents=True, exist_ok=True)
         if enabled:
-            exec_path = sys.executable + " " + str(
-                Path(__file__).resolve().parent / "brother_monitor.py")
+            exec_path = f"{sys.executable} -m printer_monitor"
             content = (
                 "[Desktop Entry]\n"
                 "Type=Application\n"

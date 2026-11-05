@@ -1,11 +1,11 @@
-# drivers/brother_http.py
+# printer_monitor/drivers/brother_http.py
 from __future__ import annotations
 import re
 
 import requests
 from bs4 import BeautifulSoup
 
-from drivers.base import PrinterData, PrinterDriver
+from printer_monitor.drivers.base import PrinterData, PrinterDriver
 
 _TIMEOUT = 5
 

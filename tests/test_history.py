@@ -1,7 +1,7 @@
 # tests/test_history.py
 import pytest
-from history import HistoryDB
-from drivers.base import PrinterData
+from printer_monitor.history import HistoryDB
+from printer_monitor.drivers.base import PrinterData
 
 
 @pytest.fixture
