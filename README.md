@@ -51,7 +51,7 @@ then log out and back in.
 git clone https://github.com/GabryXnLab/brother-monitor.git
 cd brother-monitor
 uv sync --dev
-uv run python brother_monitor.py
+uv run printer-monitor
 ```
 
 ## Printing (not what this app does — read this first)
@@ -142,16 +142,18 @@ Tests run headless (no display required) via `QT_QPA_PLATFORM=offscreen`.
 ## Project structure
 
 ```
-brother_monitor.py   — entry point, wires Qt components together
-config.py            — YAML config loader/saver
-history.py           — SQLite history storage
-tray.py              — system tray icon and notifications
-main_window.py       — main 4-tab window (Status / Stats / History / Settings)
-widgets.py           — CircularGauge custom widget
-drivers/
-  base.py            — PrinterDriver ABC and PrinterData dataclass
-  brother_http.py    — Brother web interface scraper
-  snmp.py            — SNMP polling driver
+printer_monitor/
+  app.py             — entry point (`printer-monitor`), wires Qt components together
+  config.py          — YAML config loader/saver
+  history.py         — SQLite history storage
+  tray.py            — system tray icon and notifications
+  main_window.py     — main 4-tab window (Status / Stats / History / Settings)
+  widgets.py         — CircularGauge custom widget
+  drivers/
+    base.py          — PrinterDriver ABC and PrinterData dataclass
+    brother_http.py  — Brother web interface scraper
+    snmp.py          — SNMP polling driver
+brother_monitor.py   — compatibility shim for `python brother_monitor.py`
 tests/               — pytest test suite
 ```
 

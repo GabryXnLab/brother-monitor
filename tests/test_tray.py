@@ -2,10 +2,10 @@
 import time
 import pytest
 from unittest.mock import patch
-from tray import BrotherTray, LEVEL_WARN
-from drivers.base import PrinterData
-from main_window import MainWindow
-from config import AppConfig, PrinterConfig
+from printer_monitor.tray import BrotherTray, LEVEL_WARN
+from printer_monitor.drivers.base import PrinterData
+from printer_monitor.main_window import MainWindow
+from printer_monitor.config import AppConfig, PrinterConfig
 
 
 @pytest.fixture

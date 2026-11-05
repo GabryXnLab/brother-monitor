@@ -17,18 +17,21 @@ if [ -z "$UV_BIN" ]; then
 fi
 
 sudo mkdir -p "$INSTALL_DIR"
-sudo cp -- brother_monitor.py config.py history.py \
-           main_window.py tray.py widgets.py pyproject.toml uv.lock "$INSTALL_DIR/"
-sudo cp -- *.svg "$INSTALL_DIR/" 2>/dev/null || true
-sudo cp -r drivers "$INSTALL_DIR/"
+# Moduli della vecchia struttura piatta (<= 0.1.0), ora dentro printer_monitor/.
+sudo rm -rf -- "$INSTALL_DIR/drivers" "$INSTALL_DIR/Printer--Streamline-Plump.svg"
+for old in config history main_window tray widgets; do
+    sudo rm -f -- "$INSTALL_DIR/$old.py"
+done
+sudo cp -- brother_monitor.py pyproject.toml uv.lock README.md LICENSE "$INSTALL_DIR/"
+sudo rm -rf -- "$INSTALL_DIR/printer_monitor"
+sudo cp -r printer_monitor "$INSTALL_DIR/"
 
 echo "==> Creazione venv con uv..."
 sudo "$UV_BIN" sync --frozen --no-dev --project "$INSTALL_DIR"
 
 sudo tee "$BIN_PATH" > /dev/null << 'EOF'
 #!/bin/bash
-export PYTHONPATH="/usr/local/lib/printer-monitor:$PYTHONPATH"
-exec /usr/local/lib/printer-monitor/.venv/bin/python3 /usr/local/lib/printer-monitor/brother_monitor.py "$@"
+exec /usr/local/lib/printer-monitor/.venv/bin/printer-monitor "$@"
 EOF
 sudo chmod +x "$BIN_PATH"
 
@@ -60,7 +63,6 @@ Type=simple
 ExecStart=/usr/local/bin/printer-monitor
 Restart=on-failure
 RestartSec=5
-Environment=PYTHONPATH=/usr/local/lib/printer-monitor
 
 [Install]
 WantedBy=graphical-session.target

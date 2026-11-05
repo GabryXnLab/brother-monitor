@@ -5,7 +5,7 @@ import pytest
 from pyasn1.codec.ber import decoder, encoder
 from pysnmp.proto import api
 
-from drivers.snmp import SNMPDriver
+from printer_monitor.drivers.snmp import SNMPDriver
 
 _TONER_LEVEL = "1.3.6.1.2.1.43.11.1.1.9.1.1"
 _TONER_MAX   = "1.3.6.1.2.1.43.11.1.1.8.1.1"

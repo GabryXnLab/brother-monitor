@@ -1,5 +1,5 @@
 # tests/test_config.py
-from config import load_config, save_config
+from printer_monitor.config import load_config, save_config
 
 
 def test_default_config_has_one_printer(tmp_path):

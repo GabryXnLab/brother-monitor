@@ -1,4 +1,4 @@
-# drivers/snmp.py
+# printer_monitor/drivers/snmp.py
 from __future__ import annotations
 
 import asyncio
@@ -8,7 +8,7 @@ from pysnmp.hlapi.v3arch.asyncio import (
     UdpTransportTarget, get_cmd,
 )
 
-from drivers.base import PrinterData, PrinterDriver
+from printer_monitor.drivers.base import PrinterData, PrinterDriver
 
 # Standard Printer MIB v2 OIDs (RFC 3805)
 _OID_TONER_LEVEL    = "1.3.6.1.2.1.43.11.1.1.9.1.1"
