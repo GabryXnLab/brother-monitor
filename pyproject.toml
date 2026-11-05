@@ -1,7 +1,7 @@
 [project]
 name = "brother-monitor"
 version = "0.1.0"
-description = "Monitor per stampanti Brother via SNMP"
+description = "System tray monitor for Brother printers over USB (ipp-usb) and any printer via SNMP"
 requires-python = ">=3.11"
 dependencies = [
     "PyQt6>=6.9.0",

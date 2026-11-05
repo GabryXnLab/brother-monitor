@@ -29,7 +29,7 @@ This project started to work around older OSes lacking usable Brother drivers. O
 ### Quick install (system-wide)
 
 ```bash
-git clone https://github.com/GabryXn/brother-monitor.git
+git clone https://github.com/GabryXnLab/brother-monitor.git
 cd brother-monitor
 bash install.sh
 ```
@@ -48,7 +48,7 @@ then log out and back in.
 ### Development setup
 
 ```bash
-git clone https://github.com/GabryXn/brother-monitor.git
+git clone https://github.com/GabryXnLab/brother-monitor.git
 cd brother-monitor
 uv sync --dev
 uv run python brother_monitor.py
@@ -146,7 +146,7 @@ brother_monitor.py   — entry point, wires Qt components together
 config.py            — YAML config loader/saver
 history.py           — SQLite history storage
 tray.py              — system tray icon and notifications
-main_window.py       — main 3-tab window (Status / Stats / Settings)
+main_window.py       — main 4-tab window (Status / Stats / History / Settings)
 widgets.py           — CircularGauge custom widget
 drivers/
   base.py            — PrinterDriver ABC and PrinterData dataclass
