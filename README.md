@@ -9,6 +9,7 @@ It only monitors: printing itself is CUPS's job (see [Printing](#printing-not-wh
 
 [![CI](https://github.com/GabryXnLab/brother-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/GabryXnLab/brother-monitor/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+[![PyPI](https://img.shields.io/pypi/v/brother-monitor)](https://pypi.org/project/brother-monitor/)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 | Status | Statistics |
@@ -52,9 +53,11 @@ with the page HTML attached: it becomes a test fixture and the model gets suppor
 ### As a user tool (recommended)
 
 ```bash
-uv tool install git+https://github.com/GabryXnLab/brother-monitor   # or: pipx install git+https://github.com/GabryXnLab/brother-monitor
+uv tool install brother-monitor   # or: pipx install brother-monitor
 printer-monitor
 ```
+
+To try it without installing: `uvx --from brother-monitor printer-monitor`.
 
 To start it at login, tick *Impostazioni → Avvia automaticamente al login* in the app.
 
