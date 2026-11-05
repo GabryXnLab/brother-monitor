@@ -1,0 +1,53 @@
+name: New printer model
+description: My printer shows missing or wrong values
+labels: ["printer-model"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The Brother driver reads the printer's built-in web pages. Attaching them lets us
+        add your model as a test fixture.
+
+        With the printer connected via USB (`ipp-usb`) run:
+
+        ```bash
+        curl -s 'http://localhost:60000/general/information.html?kind=item' -o information.html
+        curl -s 'http://localhost:60000/general/status.html' -o status.html
+        ```
+
+        For a network printer replace `localhost:60000` with its address.
+        **Before attaching, open both files and replace the serial number** (and anything
+        else you consider private, e.g. node name or IP address) with `XXXX`.
+  - type: input
+    id: model
+    attributes:
+      label: Printer model
+      placeholder: Brother HL-L2350DW
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options: ["USB (ipp-usb)", "Network"]
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Language of the printer's web interface
+      placeholder: English
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is missing or wrong
+      placeholder: Toner shows 0%, drum is correct
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: information.html and status.html
+      description: Drag the two files here after removing the serial number (zip them, or rename them to .txt, if GitHub refuses .html).
+    validations:
+      required: true
